@@ -17,17 +17,31 @@ interface JobsSearchParams {
 
 function parseNumber(value: string | string[] | undefined, fallback: number): number {
   const raw = Array.isArray(value) ? value[0] : value;
+
   const parsed = Number(raw);
+
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
 }
 
 function buildJobsUrl(params: { title?: string; company?: string; modality?: string; location?: string; limit: number; offset: number }) {
   const searchParams = new URLSearchParams();
 
-  if (params.title) searchParams.set('title', params.title);
-  if (params.company) searchParams.set('company', params.company);
-  if (params.modality) searchParams.set('modality', params.modality);
-  if (params.location) searchParams.set('location', params.location);
+  if (params.title) {
+		searchParams.set('title', params.title);
+	}
+
+  if (params.company) {
+		searchParams.set('company', params.company);
+	}
+
+  if (params.modality) {
+		searchParams.set('modality', params.modality);
+	}
+
+  if (params.location) {
+		searchParams.set('location', params.location);
+	}
+
   searchParams.set('limit', params.limit.toString());
   searchParams.set('offset', params.offset.toString());
 

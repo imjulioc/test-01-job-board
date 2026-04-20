@@ -83,10 +83,11 @@ También, incluiria un Makefile, para orquestar/agrupar varios comandos, con ali
 
 Implementaria una forma mucho más sencilla de aprovisionar las herramientas de desarrollo (NodeJS). Es muy común que en desarrollos, se difiera en las versiones de las dependencias que contiene el sistema. Por ejemplo, yo uso Ubuntu, tal vez mi NodeJS difiera respecto a otro colaborador, estar moviendose entre versiones de este, puede ser engorroso. Existen administradores de versiones para subsanar esto. Por lo que optaria por incluir [asdf](https://asdf-vm.com/) o [Nix](https://nixos.org/), o por lo menos [nvm](https://github.com/nvm-sh/nvm).
 
-Finalmente, de lado de lado de Backend, reemplazaria que la fuente de datos sea un JSON. Para una aplicación productiva, escogeria una base de datos por documentos, como MongoDB, encaja perfectamente, con los tipos de consultas a realizar, y aún más (como filtrar por tags). De igual forma, el guardar las aplicaciones para participantes (el endpoint `/api/apply`), encaja muy bien con esta base de datos, y la relación que crea con cada posición de trabajo.
+De lado de Backend, reemplazaria que la fuente de datos sea un JSON. Para una aplicación productiva, escogeria una base de datos por documentos, como MongoDB, encaja perfectamente, con los tipos de consultas a realizar, y aún más (como filtrar por tags). De igual forma, el guardar las aplicaciones para participantes (el endpoint `/api/apply`), encaja muy bien con esta base de datos, y la relación que crea con cada posición de trabajo.
 Como extra, a cada posición de trabajo creada en la BD, le agregaria un campo de fecha de termino, y un campo de soft deleted. De esta forma, se soporta la lógica, de retirar publicaciones ya no activas.
-
 Si se buscara crear una busqueda compleja por texto (buscar en base al titulo, compañia o palabras contenidas en la descripción), agregaria tambien una capa de ElasticSearch, o una base de datos vectorial, como Neo4j.
+
+Para CI/CD básico, incluiria GitHub actions. Verificando que el estilo de código siga las reglas establecidas. Ejecutaria la suite de tests. Todo esto, más el approve de los miembros del equipo, para poder hacer merge de la rama.
 
 ---
 

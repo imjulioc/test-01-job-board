@@ -19,3 +19,16 @@ export const JobSchema = z.object({
 });
 
 export type Job = z.infer<typeof JobSchema>;
+
+export const CandidateApplicationSchema = z.object({
+	id: z.string(),
+	jobId: z.string(),
+	name: z.string(),
+	email: z.string().email(),
+	phone: z.string(),
+	resumeUrl: z.url(),
+	coverLetter: z.string().optional(),
+	appliedAt: z.string(),
+});
+
+export type CandidateApplication = z.infer<typeof CandidateApplicationSchema>;

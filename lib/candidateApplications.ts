@@ -1,3 +1,7 @@
-import { IterableCandidateApplicationRepository, type CandidateApplicationRepository } from './candidateApplicationRepository';
+import {
+	type CandidateApplicationRepository,
+	IterableCandidateApplicationRepository
+} from "./candidateApplicationRepository";
 
-export const candidateApplicationRepository: CandidateApplicationRepository = new IterableCandidateApplicationRepository([]);
+export const candidateApplicationRepository: CandidateApplicationRepository =
+	new IterableCandidateApplicationRepository([]);

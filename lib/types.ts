@@ -1,1 +1,1 @@
-export type { Job, CandidateApplication } from './schemas';
+export type { CandidateApplication, Job } from "./schemas";

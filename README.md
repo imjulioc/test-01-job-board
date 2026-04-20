@@ -1,199 +1,153 @@
-# Test 01 — Job Board
+# Test 01 — Tablero de trabajos
 
 **Mini tablero de empleos con Next.js App Router**
 
-| Stack | |
-|---|---|
-| Next.js 16 | App Router |
-| TypeScript | Tailwind CSS |
-| ESLint | API Routes |
+- Node 25.9.0
+- TypeScript 5
+- NextJS 16.2.2
 
----
+Decidi optar por esta prueba, como reto personal. Hace tiempo que no uso NextJS, quería combinarlo con las herramientas de IA actuales, para verificar, cuanto tiempo me tomaba adaptarme nuevamente. También, por la parte personal, disfruto mucho del proceso, de crear aplicaciones React, y poder ver en vivo, como se materializa cada cambio en código en el navegador (el famoso hot reload). Entonces NextJS, al ser un framework, que incluye muchas utilidades, para crear aplicaciones React, se me hizo más atractivo.
 
-## Contexto del reto
+Utilice VSCode en conjunción con Copilot. Esto debido a que, es un modelo gratuito y no conlleva un gran tiempo en su aprovisionamiento/configuración. Honestamente, no fue la experiencia más grata (viniendo de usar Claude Code), pero fue altamente funcional.
+Para una mejor experiencia de desarrollo, y pensando, en una fácil replicación del entorno (pensando esto, como si ya estuviera trabajando con un equipo), incorpore algunas amenidades:
 
-Recibes un archivo `lib/jobs.json` con **20 vacantes** que incluyen: título, empresa, ubicación, modalidad (remoto/presencial/híbrido), salario, descripción y fecha de publicación. Tu trabajo es construir la interfaz sobre estos datos.
+- Biome
+- EditorConfig
+- AGENTS.md
 
-El JSON ya viene incluido en el repo. **No necesitas base de datos ni autenticación** para el baseline.
+Biome es un linter, fixer y formateador, del ecosistema JavaScript. Tiene soporte para JSON, CSS, JSX, y otras tecnologias, también soporta incluir conjuntos de reglas existentes (como ESLint). Es altamente configurable y personalizable (via el archivo biome.json). Con esto, se adopta un estilo marcado para el proyecto. Como cereza del pastel, Biome está escrito en Rust, por lo cual, es casi instantaneo el aplicar las reglas a la base de código.
+Está incluido como dependencia de desarrollo en el package.json.
 
-| Plazo | Trabajo estimado | Puntos totales |
-|---|---|---|
-| 3 días | 3–5 horas | 100 |
+EditorConfig, es un estandar, para marcar reglas básicas, en distintos editores. Como el tipo de identación, eliminar espacios finales, agregar salto de linea final, etc...
+
+AGENTS.md, un estandar, para los agentes programaticos. Permite definir reglas o contexto. Con esto, se puede evitar, el estar definiendo el estilo de tu proyecto constantemente, entre otros extras.
+
+Gracias a estas 3 herramientas, el uso de un agente IA para código fue más ameno, resultando en un uso de NextJS más agil. Si bien, no es parte del alcance de este proyecto. Quiero documentar, el como pensé el entorno de desarrollo.
+
+## Funcionamiento
+
+Esta aplicación de NextJS, muestra un tablero de posiciones de trabajo. Describiendo:
+
+- Titulo de la posición
+- Compañia
+- Ubicación
+- Modalidad
+- Salario
+- Descripción
+- Etiquetas
+
+Se puede realizar filtrado por:
+
+- Titulo de la posición
+- Compañia
+- Ubicación
+- Modalidad
+
+Seleccionando una posición en especifico, se puede acceder a una descripción más detallada de esta. "Permitiendo" mandar una solicitud de aplicación (sin lógica implementada en servidor).
+
+## Decisiones técnicas (desarrollo)
+
+Como se comentó. Se utilizó Biome, EditorConfig y AGENTS.md.
+
+Opté Biome, por su gran y sencilla personalización. Como por su increible velocidad, al estar programado en Rust.
+
+EditorConfig y AGENTS.md, son estandares y muy fáciles de entender/implementar.
+
+## Decisiones técnicas (código)
+
+NextJS es un framework para React. Define una estructura muy marcada de estructura para un proyecto, buscando una fácil interacción servidor-cliente. Por lo cual, me apegue estrictamente a esto, sin ir en contra de la esencia del framework.
+
+Aprovechando las caracteristicas de servidor de NextJS (Server components y SSR). Opté por cargar una unica vez, el listado JSON de las posiciones de trabajo, para todo el tiempo de vida de la aplicación. De esta forma, evitando leer el archivo, en cada render de una página.
+Para evitar hardcodear la ruta/nombre del archivo, la configuración se hace via variable de entorno. Con esto, se puede crear una capa "repositorio".
+Esta capa define las operaciones que se necesitan, para la lógica de nuestra página de listado/mostrar. Para fines de esta prueba, al leerlo desde un archivo JSON, la implementación es un "Iterable repository", el cual, recibe por parametro el array de objetos, para construir la instancia.
+Con esto, podemos importarlo, en la página donde se necesite. Evitando incluir lógica que no le compete a una página o componente React, por ejemplo, loǵica de filtrado o paginación.
+
+Como componentes reutilizables, tenemos una barra de busqueda y un selector con busqueda. Estos se utilizan en la página de listado. Para la lógica de filtrado.
+
+Finalmente, se puede seleccionar una posición deseada, para ver con más detalle sus datos. Si bien incluí un formulario para aplicar, este no es funcional.
+
+Ambas paginas, soportan path/query params. Permitiendo guardar/compartir el link, y replicar la consulta realizada. En caso de intentar acceder a una posición por id no existente. Se mostrara una pagína de recurso no encontrado.
+
+Decidí usar la libreria Zod, para validación de Schemas. Es bastante rápido y optimo su algoritmo de parseo, se integra perfectamente con el tipado de TypeScript, y permite crear tipos (TypeScript) derivadas de tus schemas, para evitar duplicar definiciones.
+
+## Qué haría con más tiempo
+
+Lo que más me causa inconformidad, es no completar los puntos extra. Los finalizaria.
+
+Aplicaria mejoras a mis decisiones tecnicas. Definiria modulos (TypeScript), más adecuados, para cada entidad. Me refiero a una mejor separación, por ejemplo, los schemas y types, no tiene mucho sentido que esten en el mismo paquete "lib" que el repositorio o errores.
+
+Desconozco, que tan personalizable es NextJS, cuando se ejecuta el servidor. Veo que existen archivos "next.config.ts". Me llama la atención, investigar si es posible, trasladar aquí la orquestación de, leer las variables de entorno y crear el repositorio. Normalmente, en la mayoria de frameworks, se suele tener una lógica de configuración y recursos globales (bases de datos, por ejemplo), siendo pasados o inyectados a los servicios que lo requieran. Entonces, si esto fuese posible, para mí sería una gran mejora, para evitar tener que estar importando constantemente (en miras de crear una verdadera aplicación de NextJS productiva).
+
+Agregaria un flujo de empaquetado/construcción de la aplicación NextJS, con Docker.
+También, incluiria un Makefile, para orquestar/agrupar varios comandos, con alias más sencillos de recordar. De momento no lo hice, porque solo hay 2 comandos repetitivos para ejecutar: `npm run dev` y `npx @biomejs/biome check --write`.
+
+Implementaria una forma mucho más sencilla de aprovisionar las herramientas de desarrollo (NodeJS). Es muy común que en desarrollos, se difiera en las versiones de las dependencias que contiene el sistema. Por ejemplo, yo uso Ubuntu, tal vez mi NodeJS difiera respecto a otro colaborador, estar moviendose entre versiones de este, puede ser engorroso. Existen administradores de versiones para subsanar esto. Por lo que optaria por incluir [asdf](https://asdf-vm.com/) o [Nix](https://nixos.org/), o por lo menos [nvm](https://github.com/nvm-sh/nvm).
+
+Finalmente, de lado de lado de Backend, reemplazaria que la fuente de datos sea un JSON. Para una aplicación productiva, escogeria una base de datos por documentos, como MongoDB, encaja perfectamente, con los tipos de consultas a realizar, y aún más (como filtrar por tags). De igual forma, el guardar las aplicaciones para participantes (el endpoint `/api/apply`), encaja muy bien con esta base de datos, y la relación que crea con cada posición de trabajo.
+Como extra, a cada posición de trabajo creada en la BD, le agregaria un campo de fecha de termino, y un campo de soft deleted. De esta forma, se soporta la lógica, de retirar publicaciones ya no activas.
+
+Si se buscara crear una busqueda compleja por texto (buscar en base al titulo, compañia o palabras contenidas en la descripción), agregaria tambien una capa de ElasticSearch, o una base de datos vectorial, como Neo4j.
 
 ---
 
 ## Requerimientos base (obligatorios)
 
-- [ ] **Página principal con listado de vacantes** — título, empresa, ubicación, modalidad y salario
-- [ ] **Filtros funcionales** por modalidad (remoto / presencial / híbrido) y por ubicación
-- [ ] **Buscador por texto** que filtre en tiempo real por título o empresa
-- [ ] **Página de detalle de vacante** con ruta dinámica `/jobs/[id]`
-- [ ] **Formulario de aplicación** en la página de detalle (nombre, email, mensaje) con validación básica
-- [ ] **Loading y error states** visibles al usuario
-- [ ] **README** con instrucciones para correr el proyecto y decisiones técnicas tomadas
-
----
+- [x] **Página principal con listado de vacantes** — título, empresa, ubicación, modalidad y salario
+- [x] **Filtros funcionales** por modalidad (remoto / presencial / híbrido) y por ubicación
+- [x] **Buscador por texto** que filtre en tiempo real por título o empresa
+- [x] **Página de detalle de vacante** con ruta dinámica `/jobs/[id]`
+- [x] **Formulario de aplicación** en la página de detalle (nombre, email, mensaje) con validación básica
+- [x] **Error states** visibles al usuario
+- [x] **README** con instrucciones para correr el proyecto y decisiones técnicas tomadas
 
 ## Extras para ir más allá (opcionales)
 
-- [ ] Persistir los filtros activos en la URL (query params) para compartir una búsqueda
+- [x] Persistir los filtros activos en la URL (query params) para compartir una búsqueda
 - [ ] Marcar vacantes como favoritas con persistencia en `localStorage`
 - [ ] Endpoint `POST /api/apply` que reciba la aplicación y la guarde en archivo o base de datos
-- [ ] Paginación o scroll infinito en el listado
+- [x] Paginación o scroll infinito en el listado
 - [ ] Ordenar vacantes por fecha, salario u otros criterios
 - [ ] Deploy en Vercel con URL pública
 - [ ] Unit tests para al menos 2 componentes o funciones
 
----
+## Antes de iniciar
 
-## Criterios de evaluación específicos
+Este proyecto está construido con TypeScript y NodeJS, utilizando el framework NextJS.
 
-- Uso correcto de **Server vs Client Components**
-- Routing con **App Router** (layouts, dynamic routes)
-- Manejo de **estado del cliente** (filtros, búsqueda)
-- Estructura de **componentes reutilizables**
-- TypeScript tipado correcto (**sin `any` injustificados**)
-
----
-
-## Rúbrica de evaluación — 100 puntos
-
-### 1. Funcionalidad (30 pts)
-
-| Criterio | Puntos |
-|---|---|
-| El proyecto corre sin errores desde el primer intento | 12 |
-| Todos los requerimientos base implementados | 10 |
-| Edge cases manejados (inputs vacíos, errores de red) | 8 |
-
-### 2. Calidad de código (25 pts)
-
-| Criterio | Puntos |
-|---|---|
-| Estructura de carpetas y archivos clara | 7 |
-| Componentes reutilizables, sin duplicación innecesaria | 7 |
-| TypeScript correctamente tipado (sin `any` sin justificar) | 6 |
-| Nombres de variables, funciones y componentes descriptivos | 5 |
-
-### 3. Decisiones técnicas y README (20 pts)
-
-| Criterio | Puntos |
-|---|---|
-| README completo con instrucciones y `.env.example` | 7 |
-| Trade-offs explicados con criterio | 7 |
-| "Qué haría con más tiempo" — honesto y con visión | 6 |
-
-### 4. UX y UI (15 pts)
-
-| Criterio | Puntos |
-|---|---|
-| La app es usable sin instrucciones previas | 6 |
-| Loading y error states visibles y útiles | 5 |
-| Diseño visual coherente (no necesita ser elaborado) | 4 |
-
-### 5. Extras (10 pts)
-
-| Criterio | Puntos |
-|---|---|
-| Features opcionales implementados y funcionales | 5 |
-| Tests (unit o integration) | 3 |
-| Deploy público funcionando | 2 |
-
-> **Rechazo inmediato:** el proyecto no corre, dependencias rotas, no hay README, o el candidato no puede explicar su propio código en la revisión técnica.
-
----
-
-## Cómo empezar
+Para instalar las dependencia de forma inmediata:
 
 ```bash
-# 1. Instalar dependencias
 npm install
+```
 
-# 2. Levantar el servidor de desarrollo
+## ¿Cómo ejecutar la aplicación? (modo desarrollo)
+
+Cargar las variables de entorno:
+
+```bash
+set -o allexport; source .env.local; set +o allexport
+```
+
+Iniciar servidor de desarrollo:
+
+```bash
 npm run dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
----
-
-## Estructura del proyecto
-
-```
-test-01-job-board/
-├── app/
-│   ├── layout.tsx          # Layout raíz
-│   ├── page.tsx            # Página principal (empieza aquí)
-│   └── globals.css         # Estilos globales con Tailwind
-├── components/             # Tus componentes van aquí
-├── lib/
-│   ├── jobs.json           # Dataset con 20 vacantes
-│   └── types.ts            # Tipos TypeScript (Job)
-└── public/                 # Assets estáticos
-```
-
-El archivo `lib/types.ts` ya incluye la interfaz `Job` con el tipado completo del JSON.
-
----
-
-## Reglas generales
-
-### Lo que sí puedes usar
-
-- Cualquier herramienta de IA: Cursor, Claude Code, GitHub Copilot, ChatGPT — sin restricciones
-- Cualquier librería de npm que consideres apropiada
-- Documentación oficial, Stack Overflow, blogs técnicos
-- Tutoriales y referencias en línea
-
-### Lo que no puedes hacer
-
-- Entregar código de un tercero sin entenderlo — se evaluará en la revisión técnica
-- Clonar un proyecto existente que resuelva exactamente el mismo problema
-- No documentar nada — el README es obligatorio
-
-> Usas IA, está bien. Lo que evaluamos es si entiendes lo que construiste, por qué tomaste cada decisión y cómo lo extenderías. La revisión técnica post-entrega es donde eso sale a la luz.
-
----
-
-## Instrucciones de entrega
-
-1. Crea un **repositorio público en GitHub** y envía el link antes de que venzan los 3 días
-2. El proyecto debe correr con `npm install` y `npm run dev` sin pasos adicionales no documentados
-3. Las variables de entorno deben estar documentadas en un archivo `.env.example` (si aplica)
-4. El README debe incluir: qué construiste, cómo correrlo, decisiones técnicas tomadas, qué harías con más tiempo
-5. Si hiciste deploy, incluye la URL en el README
-
----
-
-## Estructura esperada de tu README
-
-```markdown
-## ¿Qué construí?
-Descripción breve del proyecto y el test elegido.
-
-## Cómo correrlo
-Pasos concretos desde cero.
-
 ## Variables de entorno
-Lista y descripción de cada variable en .env.example (si aplica).
 
-## Decisiones técnicas
-¿Por qué elegiste X librería sobre Y? ¿Qué trade-offs hiciste?
+| Nombre              | Valor por defecto | Descripcion                                                                                      |
+|---------------------|-------------------|--------------------------------------------------------------------------------------------------|
+| JOB_BOARD_JOBS_FILE | lib/jobs.json     | Especifica la ruta del archivo JSON, conteniendo la fuente de datos para el listado de trabajos. |
 
-## Qué haría con más tiempo
-Sé honesto. Esto nos importa tanto como lo que sí entregaste.
+## Estilo de código
+
+Este proyecto utiliza [Biome](https://biomejs.dev/) como, linter, formateador y fixer de: código, JSON y CSS. Puedes personalizar las reglas en `biome.json`.
+
+Para aplicar las reglas en toda la base de código:
+
+```bash
+npx @biomejs/biome check --write
 ```
-
----
-
-## La revisión técnica post-entrega
-
-Una vez revisado el código, agendaremos una llamada de **30–45 minutos**. No es otro examen — es una conversación. Vamos a preguntarte cosas como:
-
-- "Explícame cómo funciona esta parte de tu código"
-- "¿Por qué usaste este approach y no este otro?"
-- "Si tuvieras que agregar [feature X], ¿cómo lo harías?"
-- "¿Qué parte te resultó más difícil y cómo la resolviste?"
-- "¿Qué cambiarías del diseño si tuvieras que escalar esto?"
-
-El objetivo es entender tu proceso de pensamiento, no hacerte tropezar. Si usaste IA para una parte, no hay problema — cuéntanos cómo la usaste y qué aprendiste del resultado.
